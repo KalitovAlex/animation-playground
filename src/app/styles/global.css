@@ -10,3 +10,22 @@ body {
   margin: 0;
   min-height: 100vh;
 }
+
+.companies-slider .swiper-wrapper {
+  transition-timing-function: linear;
+}
+
+@media (max-width: 640px) {
+  .companies-slider {
+    padding: 20px 0;
+  }
+}
+
+.case-studies-slider {
+  padding: 20px 0;
+  margin: -20px;
+}
+
+.case-studies-slider .swiper-slide {
+  padding: 20px;
+}

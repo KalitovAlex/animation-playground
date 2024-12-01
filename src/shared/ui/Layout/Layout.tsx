@@ -1,9 +1,11 @@
 import { ReactNode } from "react";
+import { Header } from "./header/header";
 
 export const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-grow">{children}</main>
+      <Header />
+      <main className="flex-grow pt-16">{children}</main>
     </div>
   );
 };
