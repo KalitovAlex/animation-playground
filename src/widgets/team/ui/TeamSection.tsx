@@ -1,6 +1,9 @@
-import { FC } from "react";
+import { FC, useRef } from "react";
 import { BaseCard } from "../../../shared/ui/Card/BaseCard";
 import { Image } from "@nextui-org/react";
+import { useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
+import { useReducedMotion } from "../../../shared/hooks/useReducedMotion";
 
 const teamMembers = [
   {
@@ -48,96 +51,228 @@ const teamMembers = [
 ];
 
 export const TeamSection: FC = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  const shouldReduceMotion = useReducedMotion();
+
+  // Анимации для фона и заголовка
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+  const titleY = useTransform(scrollYProgress, [0, 1], [100, -100]);
+
+  // Оптимизированные варианты анимаций
+  const cardVariants = {
+    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 50 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: shouldReduceMotion ? 0 : i * 0.1,
+        duration: shouldReduceMotion ? 0.3 : 0.5,
+        ease: [0.645, 0.045, 0.355, 1],
+      },
+    }),
+    hover: shouldReduceMotion
+      ? {}
+      : {
+          y: -10,
+          transition: {
+            duration: 0.3,
+            ease: "easeOut",
+          },
+        },
+  };
+
+  // Анимация для декоративных элементов
+  const decorElements = shouldReduceMotion
+    ? []
+    : [
+        {
+          animate: {
+            rotate: [0, 360],
+            scale: [1, 1.2, 1],
+          },
+          transition: { duration: 20, repeat: Infinity, ease: "linear" },
+          className:
+            "absolute -top-20 -right-20 w-40 h-40 bg-[#B9FF66] rounded-full opacity-5",
+        },
+        {
+          animate: {
+            y: [0, -30, 0],
+            x: [0, 30, 0],
+          },
+          transition: { duration: 15, repeat: Infinity, ease: "easeInOut" },
+          className:
+            "absolute bottom-20 left-10 w-24 h-24 bg-[#191A23] rounded-full opacity-5",
+        },
+      ];
+
   return (
-    <div className="container mx-auto px-4">
-      <div className="mb-16">
-        <div className="flex flex-col gap-4">
-          <div className="inline-block self-center md:self-start">
-            <span className="bg-[#B9FF66] px-6 py-2 rounded-[14px] text-2xl font-medium shadow-[4px_4px_20px_rgba(0,0,0,0.1)]">
-              Team
-            </span>
+    <motion.div
+      ref={sectionRef}
+      className="relative overflow-hidden py-20"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-100px" }}
+    >
+      {/* Анимированный фон */}
+      <motion.div
+        className="absolute inset-0 -z-10"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle at 20% 50%, rgba(185, 255, 102, 0.3) 0%, transparent 70%),
+            radial-gradient(circle at 80% 80%, rgba(185, 255, 102, 0.2) 0%, transparent 70%)
+          `,
+          y: backgroundY,
+        }}
+      />
+
+      {/* Декоративные элементы */}
+      {decorElements.map((elem, index) => (
+        <motion.div
+          key={index}
+          className={elem.className}
+          animate={elem.animate}
+          transition={elem.transition}
+        />
+      ))}
+
+      <div className="container mx-auto px-4">
+        <motion.div className="mb-16" style={{ y: titleY }}>
+          <div className="flex flex-col gap-4">
+            <motion.div
+              className="inline-block self-center md:self-start"
+              initial={{ scale: 0.5, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <span
+                className="bg-[#B9FF66] px-6 py-2 rounded-[14px] text-2xl font-medium 
+                            shadow-[4px_4px_20px_rgba(0,0,0,0.1)] inline-block
+                            hover:shadow-[6px_6px_25px_rgba(185,255,102,0.3)] 
+                            transition-all duration-300"
+              >
+                Team
+              </span>
+            </motion.div>
+            <motion.h2
+              className="text-4xl font-medium max-w-3xl text-center md:text-left"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+            >
+              Meet the skilled and experienced team behind our successful
+              digital marketing strategies
+            </motion.h2>
           </div>
-          <h2 className="text-4xl font-medium max-w-3xl text-center md:text-left">
-            Meet the skilled and experienced team behind our successful digital
-            marketing strategies
-          </h2>
-        </div>
-      </div>
+        </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {teamMembers.map((member, index) => (
-          <BaseCard
-            key={index}
-            className="p-8 relative overflow-hidden hover:scale-[1.02] transition-transform"
-            shadow={true}
-          >
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <div className="w-16 h-16 rounded-full overflow-hidden bg-[#B9FF66]">
-                      <Image
-                        src={member.image}
-                        alt={member.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-medium">{member.name}</h3>
-                    <p className="text-foreground/80">{member.position}</p>
-                  </div>
-                </div>
-                <a
-                  href="#"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-black hover:text-primary transition-colors"
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {teamMembers.map((member, index) => (
+            <motion.div
+              key={index}
+              variants={cardVariants}
+              custom={index}
+              whileHover="hover"
+            >
+              <BaseCard
+                className="p-8 relative overflow-hidden transition-all duration-300
+                         hover:shadow-[0_10px_40px_rgba(0,0,0,0.15)]"
+                shadow={true}
+              >
+                <motion.div
+                  className="flex flex-col gap-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
                 >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M16 8C17.5913 8 19.1174 8.63214 20.2426 9.75736C21.3679 10.8826 22 12.4087 22 14V21H18V14C18 13.4696 17.7893 12.9609 17.4142 12.5858C17.0391 12.2107 16.5304 12 16 12C15.4696 12 14.9609 12.2107 14.5858 12.5858C14.2107 12.9609 14 13.4696 14 14V21H10V14C10 12.4087 10.6321 10.8826 11.7574 9.75736C12.8826 8.63214 14.4087 8 16 8Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M6 9H2V21H6V9Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M4 6C5.10457 6 6 5.10457 6 4C6 2.89543 5.10457 2 4 2C2.89543 2 2 2.89543 2 4C2 5.10457 2.89543 6 4 6Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </a>
-              </div>
-              <p className="text-foreground/80 leading-relaxed">
-                {member.description}
-              </p>
-            </div>
-          </BaseCard>
-        ))}
-      </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <motion.div
+                        className="relative"
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <div className="w-16 h-16 rounded-full overflow-hidden bg-[#B9FF66]">
+                          <Image
+                            src={member.image}
+                            alt={member.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </motion.div>
+                      <div>
+                        <h3 className="text-xl font-medium">{member.name}</h3>
+                        <p className="text-foreground/80">{member.position}</p>
+                      </div>
+                    </div>
+                    <motion.a
+                      href="#"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-black hover:text-[#191A23] transition-colors"
+                      whileHover={{ scale: 1.2, rotate: 360 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M16 8C17.5913 8 19.1174 8.63214 20.2426 9.75736C21.3679 10.8826 22 12.4087 22 14V21H18V14C18 13.4696 17.7893 12.9609 17.4142 12.5858C17.0391 12.2107 16.5304 12 16 12C15.4696 12 14.9609 12.2107 14.5858 12.5858C14.2107 12.9609 14 13.4696 14 14V21H10V14C10 12.4087 10.6321 10.8826 11.7574 9.75736C12.8826 8.63214 14.4087 8 16 8Z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M6 9H2V21H6V9Z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M4 6C5.10457 6 6 5.10457 6 4C6 2.89543 5.10457 2 4 2C2.89543 2 2 2.89543 2 4C2 5.10457 2.89543 6 4 6Z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </motion.a>
+                  </div>
+                  <p className="text-foreground/80 leading-relaxed">
+                    {member.description}
+                  </p>
+                </motion.div>
+              </BaseCard>
+            </motion.div>
+          ))}
+        </div>
 
-      <div className="flex justify-center mt-12">
-        <button className="bg-[#191A23] text-white px-8 py-4 rounded-[14px] text-lg hover:shadow-[4px_4px_0px_0px_rgb(0,0,0)] transition-shadow">
-          See all team
-        </button>
+        <motion.div
+          className="flex justify-center mt-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <motion.button
+            className="bg-[#191A23] text-white px-8 py-4 rounded-[14px] text-lg
+                     hover:shadow-[4px_4px_0px_0px_rgb(0,0,0)] transition-all duration-300"
+            whileHover={{ scale: 1.05, y: -5 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            See all team
+          </motion.button>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };

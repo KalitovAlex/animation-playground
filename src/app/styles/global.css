@@ -4,6 +4,7 @@
 
 html {
   font-family: system-ui, sans-serif;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -12,7 +13,7 @@ body {
 }
 
 .companies-slider .swiper-wrapper {
-  transition-timing-function: linear;
+  transition-timing-function: linear !important;
 }
 
 @media (max-width: 640px) {
@@ -28,4 +29,29 @@ body {
 
 .case-studies-slider .swiper-slide {
   padding: 20px;
+}
+
+.gradient-mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 20%, black 80%, transparent);
+  mask-image: linear-gradient(90deg, transparent, black 20%, black 80%, transparent);
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
