@@ -4,13 +4,14 @@ import { CompaniesSlider } from "../../../widgets/companies/ui/CompaniesSlider";
 import { ServicesSection } from "../../../widgets/services/ui/ServicesSection";
 import { ContactCard } from "../../../widgets/contact/ui/ContactCard";
 import { CaseStudiesSection } from "../../../widgets/cases/ui/CaseStudiesSection";
+import { FAQSection } from "../../../widgets/faq/ui/FAQSection";
+import { TeamSection } from "../../../widgets/team/ui/TeamSection";
+import { useContactModal } from "../../../shared/hooks/useContactModal";
 
 export const DashboardPage = () => {
-  const aboutRef = useRef<HTMLDivElement>(null);
   const servicesRef = useRef<HTMLDivElement>(null);
   const useCasesRef = useRef<HTMLDivElement>(null);
-  const pricingRef = useRef<HTMLDivElement>(null);
-  const blogRef = useRef<HTMLDivElement>(null);
+  const { open } = useContactModal();
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,7 +45,7 @@ export const DashboardPage = () => {
       <section ref={servicesRef} id="services" className="min-h-screen py-20">
         <ServicesSection />
         <div className="container mx-auto px-4 mt-16">
-          <ContactCard onClick={() => console.log('Contact form opened')} />
+          <ContactCard onClick={open} />
         </div>
       </section>
 
@@ -52,12 +53,14 @@ export const DashboardPage = () => {
         <CaseStudiesSection />
       </section>
 
-      {/* About Section */}
-      <section ref={aboutRef} id="about" className="min-h-screen py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold mb-12">About Us</h2>
-          {/* Add about content */}
-        </div>
+      {/* Add FAQ Section */}
+      <section id="faq" className="py-20">
+        <FAQSection />
+      </section>
+
+      {/* Add Team Section */}
+      <section id="team" className="py-20">
+        <TeamSection />
       </section>
 
       {/* Add other sections */}
